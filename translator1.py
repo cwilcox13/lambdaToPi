@@ -111,15 +111,15 @@ d3 = expression.parseString(data3).asList()
 d4 = expression.parseString(data4).asList()
 d5 = expression.parseString(data5).asList()
 
-print d1 + "converts to:"
+print data1 + " converts to: "
 print convert (d1, '', letters)
-print d2 + "converts to:"
+print data2 + " converts to: "
 print convert (d2, '', letters)
-print d3 + "converts to:"
+print data3 + " converts to: "
 print convert (d3, '', letters)
-print d4 + "converts to:"
+print data4 + " converts to: "
 print convert (d4, '', letters)
-print d5 + "converts to:"
+print data5 + " converts to: "
 print convert (d5, '', letters)
 
 
