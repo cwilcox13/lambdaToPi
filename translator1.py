@@ -18,7 +18,7 @@ def convertVar(d, v):
 	return d + "!" + v
 
 
-def convert(d, s, letters):
+def convert(d, s, letters, level):
 	var = []
 	if not d:
 		return s
@@ -31,7 +31,7 @@ def convert(d, s, letters):
 			del var[0]
 
 		else:
-			s = convert(d[0],s, letters)
+			s = convert(d[0],s, letters,level)
 	elif len(d) == 3:
 		if d[0] == "L" and not isinstance(d[1],list):
 			var.append(letters[0])
@@ -46,7 +46,9 @@ def convert(d, s, letters):
 			if not isinstance(d[2],list):
 				s+= var1 + "?" + d[1] + "." + var1 + "?" + var2 + ".(" + convertVar(d[1],var2) + ")"
 			else:
-				s+= var1 + "?" + d[1] + "." + var1 + "?" + var2 + ".[" + convert(d[2],s, letters) + "](" + var2 + ")" 
+				s+= var1 + "?" + d[1] + "." + var1 + "?" + var2 + ".[" + convert(d[2],s, letters,level+1) + "]"
+				if level == 1:
+					s+="(" + var2 + ")" 
 		else:
 			return "wrong format"
 	elif len(d) == 2:
@@ -71,11 +73,11 @@ def convert(d, s, letters):
 		del var[0]
 		
 		if isinstance(d[0],list) and isinstance(d[1],list):
-			s+=  "new(" + var1 + "," + var2 + ").([" + convert(d[0],s,letters) + "](" + var1 + "))|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").[" + convert(d[1],s,letters) + "](" + var4 + "))"
+			s+=  "new(" + var1 + "," + var2 + ").([" + convert(d[0],s,letters,level+1) + "])|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").[" + convert(d[1],s,letters,level+1) + "])"
 		elif isinstance(d[0],list) and (not isinstance(d[1],list)):
-			s+= "new(" + var1 + "," + var2 + ").([" + convert(d[0],s,letters) + "](" + var1 + "))|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").(" + convertVar(d[1],var4) + "))"
+			s+= "new(" + var1 + "," + var2 + ").([" + convert(d[0],s,letters,level+1) + "])|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").(" + convertVar(d[1],var4) + "))"
 		elif (not isinstance(d[0],list)) and isinstance(d[1],list):
-			s+= "new(" + var1 + "," + var2 + ").(" + convertVar(d[0],var1) + ")|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").[" + convert(d[1],s,letters) + "](" + var4 + "))"
+			s+= "new(" + var1 + "," + var2 + ").(" + convertVar(d[0],var1) + ")|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").[" + convert(d[1],s,letters,level+1) + "])"
 		elif not isinstance(d[0],list) and not isinstance(d[1],list):
 			s+= "new(" + var1 + "," + var2 + ").(" + convertVar(d[0],var1) + ")|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").(" + convertVar(d[1],var4) + "))"
 		else:
@@ -125,18 +127,18 @@ d6 = expression.parseString(data6).asList()
 # print d6
 
 print data1 + " converts to: "
-print convert (d1, '', letters)
+print convert (d1, '', letters,1)
 print data2 + " converts to: "
-print convert (d2, '', letters)
+print convert (d2, '', letters,1)
 print data3 + " converts to: "
-print convert (d3, '', letters)
+print convert (d3, '', letters,1)
 print data4 + " converts to: "
-print convert (d4, '', letters)
+print convert (d4, '', letters,1)
 print data5 + " converts to: "
-print convert (d5, '', letters)
+print convert (d5, '', letters,1)
 
 print data6 + " converts to: "
-print convert (d6, '', letters)
+print convert (d6, '', letters,1)
 
 
 
