@@ -9,8 +9,10 @@ import string
 # determine what kind of expression it is looking at. It then returns a string containing all the 
 # converted expressions along with coordinating variables. There are five test functions, ranging
 # from small to medium sized lambda expressions. You are welcome to modify or add to the test functions,
-# but you should be sure to keep a space between your tokens, like so (x y), or else the parser 
-# will not work correctly. You must also use the word 'lambda' in place of the lambda symbol.
+# but you should be sure to keep a space between your tokens, like (x y), or else the parser 
+# will not work correctly. You must also use the letter 'L' in place of the lambda symbol. Finally,
+# the parser is set to obtain all tokens nested in parentheses, so if you are nesting functions,
+# you should put them in nested parentheses, such as '(L x (L y (L z ((x y) z))))'.
 
 def convertVar(d, v):
 	return d + "!" + v
@@ -18,34 +20,29 @@ def convertVar(d, v):
 
 def convert(d, s, letters):
 	var = []
-	var.append(letters[0])
-	letters = letters[1:]
-	var.append(letters[0])
-	letters = letters[1:]
-	var.append(letters[0])
-	letters = letters[1:]
-	var.append(letters[0])
-	letters = letters[1:]
 	if not d:
 		return s
 	if len(d) == 1:
-		if not isinstance(d[0],list) and d[0] != "lambda":
-			s = convertVar(d[0],var[0])
-			del var[0]
+		if not isinstance(d[0],list) and d[0] != "L":
 			var.append(letters[0])
 			letters = letters[1:]
+
+			s = convertVar(d[0],var[0])
+			del var[0]
+
 		else:
 			s = convert(d[0],s, letters)
 	elif len(d) == 3:
-		if d[0] == "lambda" and not isinstance(d[1],list):
+		if d[0] == "L" and not isinstance(d[1],list):
+			var.append(letters[0])
+			letters = letters[1:]
+			var.append(letters[0])
+			letters = letters[1:]
+
 			var1 = var[0]
 			del var[0]
-			var.append(letters[0])
-			letters = letters[1:]
 			var2 = var[0]
 			del var[0]
-			var.append(letters[0])
-			letters = letters[1:]
 			if not isinstance(d[2],list):
 				s+= var1 + "?" + d[1] + "." + var1 + "?" + var2 + ".(" + convertVar(d[1],var2) + ")"
 			else:
@@ -53,22 +50,26 @@ def convert(d, s, letters):
 		else:
 			return "wrong format"
 	elif len(d) == 2:
+		var.append(letters[0])
+		letters = letters[1:]
+		var.append(letters[0])
+		letters = letters[1:]
+		var.append(letters[0])
+		letters = letters[1:]
+		var.append(letters[0])
+		letters = letters[1:]
 		var1 = var[0]
 		del var[0]
-		var.append(letters[0])
-		letters = letters[1:]
+		
 		var2 = var[0]
 		del var[0]
-		var.append(letters[0])
-		letters = letters[1:]
+		
 		var3 = var[0]
 		del var[0]
-		var.append(letters[0])
-		letters = letters[1:]
+		
 		var4 = var[0]
 		del var[0]
-		var.append(letters[0])
-		letters = letters[1:]
+		
 		if isinstance(d[0],list) and isinstance(d[1],list):
 			s+=  "new(" + var1 + "," + var2 + ").([" + convert(d[0],s,letters) + "](" + var1 + "))|(" + var1 + "!" + var2 + "." + var1 + "!" + var3 + ")|*((" + var2 + "?" + var4 + ").[" + convert(d[1],s,letters) + "](" + var4 + "))"
 		elif isinstance(d[0],list) and (not isinstance(d[1],list)):
@@ -88,20 +89,23 @@ expression = Forward()
 lparen = Literal("(").suppress()
 rparen = Literal(")").suppress()
 
-variable = Word( alphas, max=1 ) 
-lam = Literal("lambda")
-application = (expression + expression)
-abstraction = (lam + variable + expression)
+variable = Word(alphas, max=1, excludeChars="L") 
+lam = Literal("L")
+application = Group(lparen + expression + expression + rparen)
+abstraction = Group(lparen + lam + variable + expression + rparen)
 
 
 expression << (OneOrMore(Group(lparen + expression + rparen)) |
-	OneOrMore(variable) | OneOrMore(abstraction) | OneOrMore(application))
+	OneOrMore(variable) | OneOrMore(abstraction) | (OneOrMore(application)))
 
 data1 = 'x' 
-data2 = 'lambda x x'
+data2 = '(L x x)'
 data3 = '(x y)'
-data4 = '((lambda x x)(z t))'
-data5 = 'lambda x ((x x) (x x))'
+data4 = '((L x x)(z t))'
+data5 = '(L x ((x x) (x x)))'
+
+data6 = '(L x (L y (L z ((x y) z))))'
+
 
 letters = string.lowercase
 
@@ -110,6 +114,15 @@ d2 = expression.parseString(data2).asList()
 d3 = expression.parseString(data3).asList()
 d4 = expression.parseString(data4).asList()
 d5 = expression.parseString(data5).asList()
+
+d6 = expression.parseString(data6).asList()
+
+# print d1
+# print d2
+# print d3 
+# print d4 
+# print d5 
+# print d6
 
 print data1 + " converts to: "
 print convert (d1, '', letters)
@@ -122,6 +135,8 @@ print convert (d4, '', letters)
 print data5 + " converts to: "
 print convert (d5, '', letters)
 
+print data6 + " converts to: "
+print convert (d6, '', letters)
 
 
 
